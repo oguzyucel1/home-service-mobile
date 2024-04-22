@@ -1,0 +1,4 @@
+IP: 91.225.104.133
+Database: homeservice
+User: homeservice
+Password: SrVEJGj2DNQo
