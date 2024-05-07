@@ -5,14 +5,15 @@ import 'package:home_hub/components/my_scroll_behaviour.dart';
 import 'package:home_hub/screens/splash_screen.dart';
 import 'package:home_hub/utils/colors.dart';
 import 'package:home_hub/utils/constant.dart';
-
 import 'store/appData.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 AppData appData = AppData();
 
 void main() {
   WidgetsFlutterBinding.ensureInitialized();
-  SystemChrome.setPreferredOrientations([DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  SystemChrome.setPreferredOrientations(
+      [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
   runApp(MyApp());
 }
@@ -52,7 +53,8 @@ class MyApp extends StatelessWidget {
             appBarTheme: AppBarTheme(
               iconTheme: IconThemeData(color: primaryColor),
               titleTextStyle: TextStyle(color: primaryColor),
-              systemOverlayStyle: SystemUiOverlayStyle(statusBarIconBrightness: Brightness.dark),
+              systemOverlayStyle: SystemUiOverlayStyle(
+                  statusBarIconBrightness: Brightness.dark),
             ),
             bottomNavigationBarTheme: BottomNavigationBarThemeData(
               backgroundColor: whiteColor,
@@ -90,7 +92,8 @@ class MyApp extends StatelessWidget {
               ),
               contentTextStyle: TextStyle(color: Colors.black),
             ),
-            expansionTileTheme: ExpansionTileThemeData(iconColor: whiteColor, textColor: whiteColor),
+            expansionTileTheme: ExpansionTileThemeData(
+                iconColor: whiteColor, textColor: whiteColor),
             bottomNavigationBarTheme: BottomNavigationBarThemeData(
               backgroundColor: Colors.black,
               selectedItemColor: Colors.white,
@@ -99,7 +102,8 @@ class MyApp extends StatelessWidget {
             appBarTheme: AppBarTheme(
               iconTheme: IconThemeData(color: whiteColor),
               titleTextStyle: TextStyle(color: whiteColor),
-              systemOverlayStyle: SystemUiOverlayStyle(statusBarIconBrightness: Brightness.light),
+              systemOverlayStyle: SystemUiOverlayStyle(
+                  statusBarIconBrightness: Brightness.light),
             ),
           ),
           themeMode: appData.mode,

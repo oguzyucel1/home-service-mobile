@@ -1,6 +1,6 @@
-# home_hub
+# homeservice
 
-home services app
+A new Flutter project.
 
 ## Getting Started
 
