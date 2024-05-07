@@ -6,7 +6,7 @@ import 'package:home_hub/screens/splash_screen.dart';
 import 'package:home_hub/utils/colors.dart';
 import 'package:home_hub/utils/constant.dart';
 import 'store/appData.dart';
-import 'package:supabase_flutter/supabase_flutter.dart';
+//import 'package:supabase_flutter/supabase_flutter.dart';
 
 AppData appData = AppData();
 
