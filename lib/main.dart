@@ -6,17 +6,24 @@ import 'package:home_hub/screens/splash_screen.dart';
 import 'package:home_hub/utils/colors.dart';
 import 'package:home_hub/utils/constant.dart';
 import 'store/appData.dart';
-//import 'package:supabase_flutter/supabase_flutter.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 AppData appData = AppData();
 
-void main() {
+void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
 
+  await Supabase.initialize(
+    url: 'https://iahnabhvhgqonoxxkjbo.supabase.co',
+    anonKey:
+        'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImlhaG5hYmh2aGdxb25veHhramJvIiwicm9sZSI6ImFub24iLCJpYXQiOjE3MTQ5OTM2MTksImV4cCI6MjAzMDU2OTYxOX0.OOSrHNrKX_CO5zsW4Qo6L3jsjQTEdJLNOmf6LOCf9S4',
+  );
   runApp(MyApp());
 }
+
+final supabase = Supabase.instance.client;
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
