@@ -14,6 +14,7 @@ void main() async {
   WidgetsFlutterBinding.ensureInitialized();
   SystemChrome.setPreferredOrientations(
       [DeviceOrientation.portraitUp, DeviceOrientation.portraitDown]);
+  configureDependencies();
 
   await Supabase.initialize(
     url: 'https://iahnabhvhgqonoxxkjbo.supabase.co',
@@ -24,6 +25,8 @@ void main() async {
 }
 
 final supabase = Supabase.instance.client;
+
+void configureDependencies() {}
 
 class MyApp extends StatelessWidget {
   MyApp({Key? key}) : super(key: key);
