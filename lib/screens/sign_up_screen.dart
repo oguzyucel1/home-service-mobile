@@ -11,6 +11,8 @@ import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../custom_widget/space.dart';
 import '../utils/colors.dart';
+import 'dart:convert';
+import 'package:crypto/crypto.dart'; // For sha256
 
 class SignUpScreen extends StatefulWidget {
   const SignUpScreen({Key? key}) : super(key: key);
@@ -46,6 +48,12 @@ class _SignUpScreenState extends State<SignUpScreen> {
     _passwordController.dispose();
     _confirmPasswordController.dispose();
     super.dispose();
+  }
+
+  String hashPassword(String password) {
+    var bytes = utf8.encode(password); // Convert string to bytes
+    var digest = sha256.convert(bytes); // Hash the bytes using SHA-256
+    return digest.toString(); // Convert hash to string
   }
 
   Future<void> _showAlertDialog(BuildContext context, String message) async {
@@ -89,20 +97,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
       _showAlertDialog(context, 'Passwords do not match');
       return;
     }
-
+    Navigator.push(
+        context, MaterialPageRoute(builder: (context) => SignInScreen()));
     final response =
         await supabase.auth.signUp(email: email, password: password);
-    if (response == true) {
-      Navigator.push(
-        context,
-        MaterialPageRoute(builder: (context) => SplashScreen()),
-      );
-    } else {
-      // Sign-up successful, navigate to OTP verification screen or any other screen
-
-      var error;
-      _showAlertDialog(context, error);
-    }
   }
 
   @override
