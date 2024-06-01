@@ -1,17 +1,16 @@
+import 'dart:convert';
+
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
-import 'package:home_hub/screens/splash_screen.dart';
-import 'package:supabase/supabase.dart'; // Import Supabase SDK
 import 'package:home_hub/main.dart';
-import 'package:home_hub/screens/otp_verification_screen.dart';
 import 'package:home_hub/screens/sign_in_screen.dart';
+import 'package:home_hub/screens/splash_screen.dart';
 import 'package:home_hub/utils/constant.dart';
 import 'package:home_hub/utils/widgets.dart';
 import 'package:supabase_flutter/supabase_flutter.dart';
 
 import '../custom_widget/space.dart';
 import '../utils/colors.dart';
-import 'dart:convert';
 import 'package:crypto/crypto.dart'; // For sha256
 
 class SignUpScreen extends StatefulWidget {
@@ -22,41 +21,26 @@ class SignUpScreen extends StatefulWidget {
 }
 
 class _SignUpScreenState extends State<SignUpScreen> {
-  final _signUpFormKey = GlobalKey<FormState>();
-
-  final TextEditingController _usernameController = TextEditingController();
-  final TextEditingController _emailController = TextEditingController();
-  final TextEditingController _mobileController = TextEditingController();
-  final TextEditingController _passwordController = TextEditingController();
-  final TextEditingController _confirmPasswordController =
-      TextEditingController();
-
-  bool _agreeWithTerms = false;
-
   final supabase = Supabase.instance.client;
+  TextEditingController _phoneNumberController = TextEditingController();
+  TextEditingController _fullNameController = TextEditingController();
+  TextEditingController _emailController = TextEditingController();
+  TextEditingController _passwordController = TextEditingController();
 
-  @override
-  void initState() {
-    super.initState();
-  }
+  final _signUpFormKey = GlobalKey<FormState>();
+  final TextEditingController _passController = TextEditingController();
+  final TextEditingController _confirmPassController = TextEditingController();
 
-  @override
-  void dispose() {
-    _usernameController.dispose();
-    _emailController.dispose();
-    _mobileController.dispose();
-    _passwordController.dispose();
-    _confirmPasswordController.dispose();
-    super.dispose();
-  }
+  // ignore: unused_field
+  bool _isPasswordVisible = false;
+  bool agreeWithTeams = false;
+  bool _securePassword = true;
+  bool _secureConfirmPassword = true;
+  double screenHeight = 0.0;
+  double screenWidth = 0.0;
+  bool? checkBoxValue = false;
 
-  String hashPassword(String password) {
-    var bytes = utf8.encode(password); // Convert string to bytes
-    var digest = sha256.convert(bytes); // Hash the bytes using SHA-256
-    return digest.toString(); // Convert hash to string
-  }
-
-  Future<void> _showAlertDialog(BuildContext context, String message) async {
+  Future<void> _showAlertDialog(String message) async {
     return showDialog<void>(
       context: context,
       barrierDismissible: false,
@@ -81,32 +65,62 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
-  Future<void> _signUp() async {
-    final username = _usernameController.text.trim();
-    final email = _emailController.text.trim();
-    final mobile = _mobileController.text.trim();
-    final password = _passwordController.text.trim();
-    final confirmPassword = _confirmPasswordController.text.trim();
+  Future<bool> createUser({
+    required final String email,
+    required final String password,
+  }) async {
+    try {
+      Navigator.push(
+          context, MaterialPageRoute(builder: (context) => SignInScreen()));
+      final response = await supabase.auth.signUp(
+        email: email,
+        password: password,
+      );
+      final session = response.session;
+      final error = response;
 
-    if (!_agreeWithTerms) {
-      _showAlertDialog(context, 'Please agree to the terms and conditions');
-      return;
+      // ignore: unnecessary_null_comparison
+      if (error != null) {
+        await _showAlertDialog(error.toString());
+        return false;
+      }
+      if (session != null) {
+        return true;
+      } else {
+        await _showAlertDialog('Unknown error occurred');
+        return false;
+      }
+    } catch (e) {
+      //print('Error during sign-up: $e');
+      //await _showAlertDialog('An error occurred during sign-up: $e');
+      return false;
     }
+  }
 
-    if (password != confirmPassword) {
-      _showAlertDialog(context, 'Passwords do not match');
-      return;
-    }
-    Navigator.push(
-        context, MaterialPageRoute(builder: (context) => SignInScreen()));
-    final response =
-        await supabase.auth.signUp(email: email, password: password);
+  @override
+  void dispose() {
+    _phoneNumberController.dispose();
+    _fullNameController.dispose();
+    _emailController.dispose();
+    _passwordController.dispose();
+    super.dispose();
+  }
+
+  // Hashing function
+  String hashPassword(String password) {
+    var bytes = utf8.encode(password); // Convert string to bytes
+    var digest = sha256.convert(bytes); // Hash the bytes using SHA-256
+    return digest.toString(); // Convert hash to string
   }
 
   @override
   Widget build(BuildContext context) {
+    screenHeight = MediaQuery.of(context).size.height;
+    screenWidth = MediaQuery.of(context).size.width;
+
     return Scaffold(
       body: SingleChildScrollView(
+        scrollDirection: Axis.vertical,
         child: Padding(
           padding: const EdgeInsets.all(20.0),
           child: Column(
@@ -117,9 +131,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                 child: Text(
                   "Sign Up",
                   style: TextStyle(
-                    fontSize: mainTitleTextSize,
-                    fontWeight: FontWeight.bold,
-                  ),
+                      fontSize: mainTitleTextSize, fontWeight: FontWeight.bold),
                 ),
               ),
               Space(60),
@@ -129,8 +141,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                   crossAxisAlignment: CrossAxisAlignment.center,
                   children: [
                     TextFormField(
-                      controller: _usernameController,
-                      keyboardType: TextInputType.name,
+                      controller: _fullNameController,
+                      keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.next,
                       style: TextStyle(fontSize: 16),
                       decoration: commonInputDecoration(hintText: "Username"),
@@ -145,8 +157,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     Space(16),
                     TextFormField(
-                      controller: _mobileController,
-                      keyboardType: TextInputType.phone,
+                      controller: _phoneNumberController,
+                      keyboardType: TextInputType.text,
                       textInputAction: TextInputAction.next,
                       inputFormatters: [LengthLimitingTextInputFormatter(10)],
                       style: TextStyle(fontSize: 20),
@@ -155,48 +167,75 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     ),
                     Space(16),
                     TextFormField(
-                      controller: _passwordController,
+                      controller: _passController,
                       textInputAction: TextInputAction.next,
                       keyboardType: TextInputType.visiblePassword,
-                      obscureText: true,
+                      obscureText: _securePassword,
                       style: TextStyle(fontSize: 20),
                       decoration: commonInputDecoration(
                         hintText: "Password",
+                        suffixIcon: Padding(
+                          padding: EdgeInsets.only(right: 5.0),
+                          child: IconButton(
+                            icon: Icon(
+                                _securePassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                size: 18),
+                            onPressed: () {
+                              setState(() {
+                                _securePassword = !_securePassword;
+                              });
+                            },
+                          ),
+                        ),
                       ),
                     ),
                     Space(16),
                     TextFormField(
-                      controller: _confirmPasswordController,
+                      controller: _confirmPassController,
                       textInputAction: TextInputAction.done,
                       autovalidateMode: AutovalidateMode.onUserInteraction,
                       keyboardType: TextInputType.emailAddress,
-                      obscureText: true,
+                      obscureText: _secureConfirmPassword,
                       style: TextStyle(fontSize: 20),
                       decoration: commonInputDecoration(
                         hintText: "Re-enter Password",
+                        suffixIcon: Padding(
+                          padding: EdgeInsets.only(right: 5.0),
+                          child: IconButton(
+                            icon: Icon(
+                                _secureConfirmPassword
+                                    ? Icons.visibility_off
+                                    : Icons.visibility,
+                                size: 18),
+                            onPressed: () {
+                              setState(() {
+                                _secureConfirmPassword =
+                                    !_secureConfirmPassword;
+                              });
+                            },
+                          ),
+                        ),
                       ),
                     ),
                     Space(16),
                     Theme(
                       data: ThemeData(
-                        unselectedWidgetColor:
-                            appData.isDark ? Colors.white : blackColor,
-                      ),
+                          unselectedWidgetColor:
+                              appData.isDark ? Colors.white : blackColor),
                       child: CheckboxListTile(
                         contentPadding: EdgeInsets.all(0),
                         shape: RoundedRectangleBorder(
-                          borderRadius: BorderRadius.circular(5),
-                        ),
+                            borderRadius: BorderRadius.circular(5)),
                         activeColor: Colors.black,
-                        title: Text(
-                          "I agree to the Terms and Conditions",
-                          style: TextStyle(fontWeight: FontWeight.normal),
-                        ),
-                        value: _agreeWithTerms,
+                        title: Text("I agree to the Terms and Conditions",
+                            style: TextStyle(fontWeight: FontWeight.normal)),
+                        value: checkBoxValue,
                         dense: true,
                         onChanged: (newValue) {
                           setState(() {
-                            _agreeWithTerms = newValue!;
+                            checkBoxValue = newValue;
                           });
                         },
                         controlAffinity: ListTileControlAffinity.leading,
@@ -206,6 +245,57 @@ class _SignUpScreenState extends State<SignUpScreen> {
                     SizedBox(
                       width: MediaQuery.of(context).size.width,
                       child: ElevatedButton(
+                        onPressed: () async {
+                          if (_signUpFormKey.currentState!.validate()) {
+                            if (checkBoxValue == true) {
+                              final email = _emailController.text;
+                              final password = _passController.text;
+                              if (password == _confirmPassController.text) {
+                                final isSuccess = await createUser(
+                                    email: email, password: password);
+                                if (isSuccess) {
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SplashScreen()),
+                                  );
+                                }
+                              } else {
+                                _showAlertDialog('Passwords do not match');
+                              }
+                            } else {
+                              _showAlertDialog(
+                                  'Please agree to the terms and conditions');
+                            }
+                          }
+
+                          // Şifreyi hashle
+                          String hashedPassword =
+                              hashPassword(_passwordController.text);
+
+                          // Kullanıcı verisini Supabase'e ekle
+                          final response = await supabase.from('users').insert([
+                            {
+                              'phone_number': _phoneNumberController.text,
+                              'name': _fullNameController.text,
+                              'email': _emailController.text,
+                              'password': hashedPassword,
+                            }
+                          ]);
+
+                          if (response.error == null) {
+                            setState(() {
+                              Navigator.push(
+                                  context,
+                                  MaterialPageRoute(
+                                      builder: (context) => SignInScreen()));
+                            });
+                          } else {
+                            // Hata durumu
+                            print(
+                                'Error signing up: ${response.error!.message}');
+                          }
+                        },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.all(16),
                           textStyle: TextStyle(fontSize: 25),
@@ -214,15 +304,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               ? Colors.grey.withOpacity(0.2)
                               : Colors.black,
                         ),
-                        onPressed: _signUp,
-                        child: Text(
-                          "Sign Up",
-                          style: TextStyle(
-                            fontWeight: FontWeight.bold,
-                            fontSize: 16,
-                            color: Colors.white,
-                          ),
-                        ),
+                        child: Text("Sign Up",
+                            style: TextStyle(
+                                fontWeight: FontWeight.bold,
+                                fontSize: 16,
+                                color: Colors.white)),
                       ),
                     ),
                     Space(20),
@@ -245,7 +331,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                                   fontWeight: FontWeight.bold, fontSize: 16)),
                         ],
                       ),
-                    ),
+                    )
                   ],
                 ),
               ),

@@ -1,6 +1,7 @@
 String name = "John Smith";
 String email = "johnsmith@gmail.com";
-String about = "I am great to accept any service at free of cost. Provider please contact me if any issue is faced. Thank you.";
+String about =
+    "I am great to accept any service at free of cost. Provider please contact me if any issue is faced. Thank you.";
 
 String get getName => name;
 
