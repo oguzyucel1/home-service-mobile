@@ -8,6 +8,7 @@ import 'package:home_hub/utils/colors.dart';
 import 'package:home_hub/utils/images.dart';
 
 import '../custom_widget/space.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class AccountFragment extends StatefulWidget {
   const AccountFragment({Key? key}) : super(key: key);
@@ -17,6 +18,18 @@ class AccountFragment extends StatefulWidget {
 }
 
 class _AccountFragmentState extends State<AccountFragment> {
+  @override
+  void initState() {
+    super.initState();
+    fetchUserProfileandUpdateUI();
+  }
+
+  Future<void> fetchUserProfileandUpdateUI() async {
+    // Kullanıcı profili bilgilerini  güncelleme
+    await fetchUserProfile();
+    setState(() {});
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -35,11 +48,18 @@ class _AccountFragmentState extends State<AccountFragment> {
         child: Column(
           mainAxisAlignment: MainAxisAlignment.center,
           children: [
-            SizedBox(height: 90, width: 90, child: CircleAvatar(backgroundImage: AssetImage(userImage))),
+            SizedBox(
+                height: 90,
+                width: 90,
+                child: CircleAvatar(backgroundImage: AssetImage(userImage))),
             Space(8),
-            Text(getName, textAlign: TextAlign.start, style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
+            Text(getName,
+                textAlign: TextAlign.start,
+                style: TextStyle(fontWeight: FontWeight.w900, fontSize: 20)),
             Space(4),
-            Text(getEmail, textAlign: TextAlign.start, style: TextStyle(color: secondaryColor, fontSize: 12)),
+            Text(getEmail,
+                textAlign: TextAlign.start,
+                style: TextStyle(color: secondaryColor, fontSize: 12)),
             Space(16),
             ListTile(
               horizontalTitleGap: 4,
@@ -48,7 +68,8 @@ class _AccountFragmentState extends State<AccountFragment> {
               title: Text("My Profile"),
               trailing: Icon(Icons.edit, size: 16),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => MyProfileScreen()));
+                Navigator.push(context,
+                    MaterialPageRoute(builder: (context) => MyProfileScreen()));
               },
             ),
             ListTile(
@@ -57,7 +78,10 @@ class _AccountFragmentState extends State<AccountFragment> {
               leading: Icon(Icons.favorite, size: 20),
               title: Text("My Favourites", style: TextStyle()),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => FavouriteProvidersScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => FavouriteProvidersScreen()));
               },
             ),
             ListTile(
@@ -66,7 +90,10 @@ class _AccountFragmentState extends State<AccountFragment> {
               leading: Icon(Icons.notifications, size: 20),
               title: Text("Notifications"),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => NotificationScreen()));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) => NotificationScreen()));
               },
             ),
             ListTile(
@@ -75,7 +102,11 @@ class _AccountFragmentState extends State<AccountFragment> {
               leading: Icon(Icons.calendar_month, size: 20),
               title: Text("My bookings"),
               onTap: () {
-                Navigator.push(context, MaterialPageRoute(builder: (context) => BookingsFragment(fromProfile: true)));
+                Navigator.push(
+                    context,
+                    MaterialPageRoute(
+                        builder: (context) =>
+                            BookingsFragment(fromProfile: true)));
               },
             ),
             ListTile(
