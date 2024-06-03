@@ -1,10 +1,12 @@
 import 'package:flutter/material.dart';
 import 'package:home_hub/components/profile_widget.dart';
 import 'package:home_hub/components/text_field_widget.dart';
+import 'package:home_hub/fragments/account_fragment.dart';
 import 'package:home_hub/models/customer_details_model.dart';
 import 'package:home_hub/screens/dashboard_screen.dart';
 import 'package:home_hub/utils/colors.dart';
 import 'package:home_hub/utils/images.dart';
+import 'package:supabase_flutter/supabase_flutter.dart';
 
 class MyProfileScreen extends StatefulWidget {
   const MyProfileScreen({Key? key}) : super(key: key);
@@ -17,6 +19,29 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
   String customerName = "";
   String customerEmail = "";
   String customerAbout = "";
+
+  Future<void> _updateUserProfile() async {
+    // Kullanıcı profil sayfasını logged-in kullanıcıya göre otomatik olarak güncelleme
+    final SupabaseClient supabaseClient = Supabase.instance.client;
+    final user = supabaseClient.auth.currentUser;
+    if (user != null) {
+      final response = await supabaseClient
+          .from('users') // 'users' tablosunun adı
+          .update({
+        'name': customerName,
+        'about': customerAbout,
+      }).eq('email', user.email!);
+
+      if (response.error == null) {
+        print('User profile updated successfully.');
+      } else {
+        // Hata yönetimi
+        print('Error updating user profile: ${response.error?.message}');
+      }
+    } else {
+      print('No user is currently logged in.');
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -43,7 +68,7 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 shape: StadiumBorder(),
               ),
               child: Text("Save", style: TextStyle(fontSize: 16)),
-              onPressed: () {
+              onPressed: () async {
                 if (customerName != "") {
                   setName(customerName);
                 }
@@ -53,12 +78,13 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
                 if (customerAbout != "") {
                   setAbout(customerAbout);
                 }
-                setState(() {
-                  Navigator.pushAndRemoveUntil(
-                    context,
-                    MaterialPageRoute(builder: (context) => DashBoardScreen()),
-                    (route) => false,
-                  );
+                Navigator.pushAndRemoveUntil(
+                  context,
+                  MaterialPageRoute(builder: (context) => DashBoardScreen()),
+                  (route) => false,
+                );
+                setState(() async {
+                  await _updateUserProfile();
                 });
               },
             ),
