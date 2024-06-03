@@ -1,13 +1,36 @@
-String name = "John Smith";
-String email = "johnsmith@gmail.com";
-String about =
-    "I am great to accept any service at free of cost. Provider please contact me if any issue is faced. Thank you.";
+import 'package:supabase_flutter/supabase_flutter.dart';
 
-String get getName => name;
+Future<void> fetchUserProfile() async {
+  //  Logged-In ullanıcı profili bilgilerini databaseden otomaik olarak getirme
+  final SupabaseClient supabaseClient = Supabase.instance.client;
+  final user = supabaseClient.auth.currentUser;
+  if (user != null) {
+    final response = await supabaseClient
+        .from('users') //  supabasede 'users' tablosunun adı
+        .select()
+        .eq('email', user.email!) // email eşitliği
+        .single(); // tek bir kayıt getirme
 
-String get getEmail => email;
+    if (response != null) {
+      // response boş değilse
+      setName(response['name'] ?? ''); // response'dan gelen name değerini alır
+      setEmail(
+          response['email'] ?? ''); // response'dan gelen email değerini alır
+      setAbout(
+          response['about'] ?? ''); // response'dan gelen about değerini alır
+      setIcon(response['name']?.substring(0, 1) ??
+          ''); // icon için username'in ilk harfi
+    } else {
+      // Hata yönetimi
+      //print('Error fetching user profile: ${response.error.message}');
+    }
+  }
+}
 
-String get getAbout => about;
+String? name; // string değerlerini null olabilir olarak tanımlama
+String? email;
+String? about;
+String? icon;
 
 void setName(String value) {
   name = value;
@@ -20,3 +43,15 @@ void setEmail(String value) {
 void setAbout(String value) {
   about = value;
 }
+
+void setIcon(String value) {
+  icon = value;
+}
+
+String get getName => name ?? '';
+
+String get getEmail => email ?? '';
+
+String get getAbout => about ?? '';
+
+String get getIcon => icon ?? '';
