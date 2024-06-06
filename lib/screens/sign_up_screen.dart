@@ -65,6 +65,11 @@ class _SignUpScreenState extends State<SignUpScreen> {
     );
   }
 
+  Future<bool> checkUserExists(String email) async {
+    final response = await supabase.from('users').select().eq('email', email);
+    return response != null && response.length > 0;
+  }
+
   Future<bool> createUser({
     required final String email,
     required final String password,
@@ -91,8 +96,8 @@ class _SignUpScreenState extends State<SignUpScreen> {
         return false;
       }
     } catch (e) {
-      //print('Error during sign-up: $e');
-      //await _showAlertDialog('An error occurred during sign-up: $e');
+      print('Error during sign-up: $e');
+      await _showAlertDialog('An error occurred during sign-up: $e');
       return false;
     }
   }
@@ -251,13 +256,36 @@ class _SignUpScreenState extends State<SignUpScreen> {
                               final email = _emailController.text;
                               final password = _passController.text;
                               if (password == _confirmPassController.text) {
-                                final isSuccess = await createUser(
-                                    email: email, password: password);
-                                if (isSuccess) {
+                                final userExists = await checkUserExists(email);
+                                if (!userExists) {
+                                  final isSuccess = await createUser(
+                                      email: email, password: password);
+
+                                  String hashedPassword =
+                                      hashPassword(_passwordController.text);
+
+                                  final response =
+                                      await supabase.from('users').insert([
+                                    {
+                                      'phone_number':
+                                          _phoneNumberController.text,
+                                      'name': _fullNameController.text,
+                                      'email': _emailController.text,
+                                      'password': hashedPassword,
+                                    }
+                                  ]);
                                   Navigator.push(
                                     context,
                                     MaterialPageRoute(
                                         builder: (context) => SplashScreen()),
+                                  );
+                                } else {
+                                  await _showAlertDialog(
+                                      'User with this email already exists');
+                                  Navigator.push(
+                                    context,
+                                    MaterialPageRoute(
+                                        builder: (context) => SignInScreen()),
                                   );
                                 }
                               } else {
@@ -270,11 +298,10 @@ class _SignUpScreenState extends State<SignUpScreen> {
                           }
 
                           // Şifreyi hashle
-                          String hashedPassword =
-                              hashPassword(_passwordController.text);
 
                           // Kullanıcı verisini Supabase'e ekle
-                          final response = await supabase.from('users').insert([
+
+                          /* final response = await supabase.from('users').insert([
                             {
                               'phone_number': _phoneNumberController.text,
                               'name': _fullNameController.text,
@@ -294,7 +321,7 @@ class _SignUpScreenState extends State<SignUpScreen> {
                             // Hata durumu
                             print(
                                 'Error signing up: ${response.error!.message}');
-                          }
+                          } */
                         },
                         style: ElevatedButton.styleFrom(
                           padding: EdgeInsets.all(16),
