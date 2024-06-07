@@ -6,7 +6,7 @@ Future<void> fetchUserProfile() async {
   final user = supabaseClient.auth.currentUser;
   if (user != null) {
     final response = await supabaseClient
-        .from('users') //  supabasede 'users' tablosunun adı
+        .from('Hulya') //  supabasede 'users' tablosunun adı
         .select()
         .eq('email', user.email!) // email eşitliği
         .single(); // tek bir kayıt getirme
@@ -15,9 +15,9 @@ Future<void> fetchUserProfile() async {
       // response boş değilse
       setName(response['name'] ?? ''); // response'dan gelen name değerini alır
       setEmail(
-          response['email'] ?? ''); // response'dan gelen email değerini alır
+          response['city'] ?? ''); // response'dan gelen email değerini alır
       setAbout(
-          response['about'] ?? ''); // response'dan gelen about değerini alır
+          response['adress'] ?? ''); // response'dan gelen about değerini alır
       setIcon(response['name']?.substring(0, 1) ??
           ''); // icon için username'in ilk harfi
     } else {
