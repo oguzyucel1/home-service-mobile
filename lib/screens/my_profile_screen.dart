@@ -26,10 +26,10 @@ class _MyProfileScreenState extends State<MyProfileScreen> {
     final user = supabaseClient.auth.currentUser;
     if (user != null) {
       final response = await supabaseClient
-          .from('users') // 'users' tablosunun adı
+          .from('Hulya') // 'users' tablosunun adı
           .update({
         'name': customerName,
-        'about': customerAbout,
+        'address': customerAbout,
       }).eq('email', user.email!);
 
       if (response.error == null) {
